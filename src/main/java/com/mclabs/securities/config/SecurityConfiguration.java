@@ -1,7 +1,5 @@
 package com.mclabs.securities.config;
 
-import javax.sql.DataSource;
-
 import com.mclabs.securities.filter.CustomAuthenticationFilter;
 import com.mclabs.securities.filter.CustomAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +38,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh/**").permitAll();
-//        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("ROLE_USER");
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
