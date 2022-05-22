@@ -15,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
 @EnableWebSecurity
@@ -31,11 +34,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+
+        /** <----- csrf: enable cookie based csrf protection-----> */
+        // withHttpOnlyFalse: The browser will allow javascript originating from the same origin to access the cookie
+        // in SPA, CSRF token can not include in HTML. Hence it needs to include in cookie sent to user browser.
+        // So the client side, we EXTRACT TOKEN  FROM THIS COOKIE ALSO YOU NEED A PERMISSION TO READ THE COOKIE
+//        http.csrf()
+//                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+//
+        http.csrf().disable();
+
+        /** Don't create a session/token by spring. We will handle session by jwt later. */
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        /** <---- content security policy: should use in prod ---->  */
+        //http.headers().contentSecurityPolicy("script-src: http://mydomain...");
+
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
         customAuthenticationFilter.setFilterProcessesUrl("/api/login");
-
-        http.csrf().disable();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh/**").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
@@ -45,6 +62,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
+    }
+    /** <---- http firewall - Block NON-ASCII character ----> */
+    @Bean
+    public HttpFirewall firewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true);
+        return firewall;
     }
 
     @Override

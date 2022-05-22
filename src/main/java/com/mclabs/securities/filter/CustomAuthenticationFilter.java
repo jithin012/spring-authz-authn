@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -62,7 +63,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         // usually useful when brut force attack, exceed the time to login
-        super.unsuccessfulAuthentication(request, response, failed);
+        log.error("!! unsuccessfulAuthentication = {}!!", failed.getMessage());
+        response.setHeader("error", failed.getMessage());
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        Map<String, String> error = new HashMap<>();
+        error.put("message", failed.getMessage());
+        response.setContentType("application/json");
+        new ObjectMapper().writeValue(response.getOutputStream(), error);
     }
 
     @Override
