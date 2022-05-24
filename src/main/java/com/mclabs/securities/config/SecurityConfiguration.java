@@ -3,6 +3,7 @@ package com.mclabs.securities.config;
 import com.mclabs.securities.filter.CustomAuthenticationFilter;
 import com.mclabs.securities.filter.CustomAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -24,8 +24,12 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    UserDetailsService userDetailsService;
+
+    @Autowired
+    PasswordEncoder bCryptPasswordEncoder;
+
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

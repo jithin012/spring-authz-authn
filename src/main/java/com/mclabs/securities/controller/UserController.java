@@ -34,10 +34,10 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    UserService userService;
     @GetMapping("/user/getAll")
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());

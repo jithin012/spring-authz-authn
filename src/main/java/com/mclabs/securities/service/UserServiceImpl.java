@@ -6,6 +6,7 @@ import com.mclabs.securities.repo.RoleRepo;
 import com.mclabs.securities.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,16 +19,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
 @Transactional
 @Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    private final UserRepo userRepo;
-    private final RoleRepo roleRepo;
+    @Autowired
+    UserRepo userRepo;
 
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    RoleRepo roleRepo;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
