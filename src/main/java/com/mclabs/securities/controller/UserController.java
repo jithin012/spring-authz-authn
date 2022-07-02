@@ -16,6 +16,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mclabs.securities.domain.Role;
 import com.mclabs.securities.domain.User;
+import com.mclabs.securities.service.AccountServiceImpl;
 import com.mclabs.securities.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,10 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    AccountServiceImpl accountService;
+
     @GetMapping("/user/getAll")
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());
@@ -93,6 +98,12 @@ public class UserController {
         } else {
             throw new RuntimeException("refresh token is missing");
         }
+    }
+
+    @GetMapping("/confirmAccount")
+    public String confirmAccount(@RequestParam("token") String token) {
+        accountService.confirmAccount(token);
+        return "account confirmed";
     }
 }
 

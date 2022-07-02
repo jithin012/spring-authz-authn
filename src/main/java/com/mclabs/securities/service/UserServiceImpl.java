@@ -4,9 +4,11 @@ import com.mclabs.securities.domain.Role;
 import com.mclabs.securities.domain.User;
 import com.mclabs.securities.repo.RoleRepo;
 import com.mclabs.securities.repo.UserRepo;
+import com.mclabs.securities.util.OnCreateAccountEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,6 +35,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepo.findByUsername(username);
@@ -54,9 +59,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
     @Override
     public User saveUser(User user) {
+        // 1. check for error
+        // 2. verify  account and user doesn't exist
+        // 3. verify email address
+        // 4. encrypt password
+        // 5. create account
+        // 6. fire off an event on creation
+
         log.info("saving new user {} to database", user.getName());
+        // step 4.5
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepo.save(user);
+        User newUser =  userRepo.save(user);
+
+        //step 6. fire off an event
+        eventPublisher.publishEvent(new OnCreateAccountEvent(newUser, "email_app"));
+
+        return newUser;
     }
 
     @Override
